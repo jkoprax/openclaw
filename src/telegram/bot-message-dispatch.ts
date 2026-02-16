@@ -287,7 +287,14 @@ export const dispatchTelegramMessage = async ({
                 | undefined
             )?.buttons;
             let draftStoppedForPreviewEdit = false;
-            if (!hasMedia && payload.text && typeof previewMessageId === "number") {
+            // Only finalize via preview edit once; subsequent final payloads
+            // (e.g. follow-up warnings/errors) should be sent as new messages.
+            if (
+              !finalizedViaPreviewMessage &&
+              !hasMedia &&
+              payload.text &&
+              typeof previewMessageId === "number"
+            ) {
               const canFinalizeViaPreviewEdit = payload.text.length <= draftMaxChars;
               if (canFinalizeViaPreviewEdit) {
                 draftStream?.stop();
